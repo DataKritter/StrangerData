@@ -1,0 +1,125 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(tidyverse)
+library(jsonlite)
+library(unheadr)
+#gender
+import <- read_json("characters-gender.json")
+
+gender <- as.tibble(import) %>%
+      unlist() %>%
+      as.tibble() %>%
+      untangle2("male$", value, gender)
+
+#groups
+import <- read_json("characters-groups.json")
+
+groups <- as.tibble(import) %>%
+      unlist() %>%
+      as.tibble() %>%
+      untangle2("Party|Main|Upside Down|Include", value, group)
+
+
+#episodes
+import <- read_json("episodes.json")
+
+episodes <- as.tibble(import) %>%
+      mutate(seasonNum = map(import[[1]], "seasonNum"),
+             episodeNum = map(import[[1]], "episodeNum"),
+             episodeTitle = map(import[[1]], "episodeTitle"),
+             episodeAirDate = map(import[[1]], "episodeAirDate"),
+             episodeDescription = map(import[[1]], "episodeDescription")) %>%
+      select(-episodes)
+
+#scenes
+import <- read_json("episodes.json")
+
+episodes <- import %>%
+      as.tibble() %>%
+      unlist(recursive = FALSE)
+
+episodes <- as.tibble(import) %>%
+      mutate(seasonNum = map(import[[1]], "seasonNum"),
+             episodeNum = map(import[[1]], "episodeNum"),
+             episodeTitle = map(import[[1]], "episodeTitle"),
+             episodeAirDate = map(import[[1]], "episodeAirDate"),
+             episodeDescription = map(import[[1]], "episodeDescription"),
+             scenes = map(import[[1]], "scenes"),
+             scenes_all = map(scenes[1], unlist, recursive = FALSE)) %>%
+      select(-scenes, -episodes) 
+
+# ^^ It's all working up to here.  Now need to unlist the scenes_all column...
+
+scenery <- episodes[1,]$scenes_all %>%
+      map(sceneStart = map(import[[1]], "sceneStart"))
+
+# 
+# 
+# 
+# #halfway step
+# scenes_ip <- import %>%
+#       mutate(scenes = map(import[[1]], "scenes")) %>%
+#       mutate(n_scenes = map_int(scenes, length))
+# 
+# scenes_sub <- scenes_ip %>%
+#       mutate(scenes_all = map(scenes_ip[1], 1)) %>%
+#       
+# 
+# 
+# 
+# # Template from  https://jennybc.github.io/purrr-tutorial/ls02_map-extraction-advanced.html#list_inside_a_data_frame
+#       # udf %>% 
+#       #   mutate(n_repos = map_int(gh_repos, length))
+#       # one_user <- udf$gh_repos[[1]]
+#       # one_repo <- one_user[[1]]
+#       # str(one_repo, max.level = 1, list.len = 5)
+#       # one_repo[c("name", "fork", "open_issues")]
+#       # map_df(one_user, `[`, c("name", "fork", "open_issues"))
+#       # 
+#       # udf %>% 
+#       #   mutate(repo_info = gh_repos %>%
+#       #            map(. %>% map_df(`[`, c("name", "fork", "open_issues"))))
+# # ---------
+# 
+# 
+# scenes_sub %>%
+#       mutate(n_scenes = map_int(scenes_sub, length))
+# 
+# one_episode <- episodes$episodes[[1]][7]
+# one_scene <- one_episode[[1]]
+# str(one_scene, max.level = 1, list.len = 5)
+# one_scene[c("sceneStart", "sceneEnd", "characters")]
+# 
+# mydf <- map_df(one_scene[[1]][7], `[`, c("sceneStart", "sceneEnd"))
+# 
+# 
+# scenes_full <- scenes_sub %>%
+#       mutate(scene_info = episodes$episodes %>%
+#                    map(. %>% map_df(`[`, c("sceneStart", "sceneEnd"))))
+# # 
+# # 
+# # udf = scenes_sub
+# # gh_repos = scenes_sub
+# # one_user = one_episode
+# # one_repo = one_scene
+# # 
+# # 
+# # mutate
+# #       
+# #       mutate(seasonNum = map(stranger[[1]], "seasonNum"),
+# #        episodeNum = map(stranger[[1]], "episodeNum"),
+# #        episodeTitle = map(stranger[[1]], "episodeTitle"),
+# #        episodeAirDate = map(stranger[[1]], "episodeAirDate"),
+# #        episodeDescription = map(stranger[[1]], "episodeDescription")) 
+# # 
+# # 
+# 
+
+
+```
+
