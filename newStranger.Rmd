@@ -1,0 +1,167 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+First, we load lots of libraries that we'll need:
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(jsonlite)
+library(unheadr)
+library(readr)
+
+```
+
+Then we start importing the various datasets from https://github.com/jeffreylancaster/stranger-things
+
+
+```{r}
+
+#gender
+
+gender <- read_csv("gender.csv", col_types = cols(gender = col_factor(levels = c("female", 
+    "male"))), na = "NA")
+
+#groups
+groups <- read_json("characters-groups.json") %>%
+      as.tibble() %>%
+      unlist() %>%
+      as.tibble() %>%
+      untangle2("Party|Main|Upside Down|Include", value, group) %>%
+      rename(character = value)
+
+#scenes
+scenes <- read_csv("stranger-things.csv",
+                   col_types = cols(
+                   sceneEnd = col_time(format = "%H:%M:%S"),
+                   sceneStart = col_time(format = "%H:%M:%S")
+                   )) %>%
+      gather(chars1:chars18, key = Chars, value = Name) %>%
+      arrange(seasonNum, episodeNum, sceneNum) %>%
+      select(-Chars) %>%
+      na.omit() %>%
+      rename(character = Name) %>%
+      mutate(scene_length = sceneStart - sceneEnd,
+             episode_id = seasonNum * 10 + episodeNum,
+             scene_id = seasonNum * 10 + episodeNum + sceneNum/1000) %>%
+      left_join(gender) %>%
+      left_join(groups)
+
+#characters in scenes
+char_scenes <- scenes  %>%
+      select(character, seasonNum, episode_id, scene_id, scene_length) %>%
+      distinct() %>%
+      arrange(character, scene_id) %>%
+      group_by(character) %>%
+      summarize(num_scenes = n_distinct(scene_id),
+                num_episodes = n_distinct(episode_id),
+                num_seasons = n_distinct(seasonNum),
+                screen_time = sum(scene_length)) %>%
+      left_join(gender) %>%
+      left_join(groups)  %>%
+      mutate(group = ifelse(is.na(group), "Uncredited", group))
+
+```
+
+
+```{r}
+# which characters are in the most episodes?
+char_scenes %>%
+      filter(group %in% c("Main", "Party", "Upside Down") ) %>%
+      ggplot(aes(x = reorder(character, num_episodes), y = num_episodes, fill = reorder(character, num_episodes))) +
+      geom_bar(stat = "identity") +
+      coord_flip() +
+      guides(fill = FALSE) +
+      scale_fill_viridis_d(direction = -1)
+
+# which characters are in the most scenes?
+char_scenes %>%
+      filter(group %in% c("Main", "Party", "Upside Down") ) %>%
+      ggplot(aes(x = reorder(character, num_scenes), y = num_scenes, fill = reorder(character, num_scenes))) +
+      geom_bar(stat = "identity") +
+      coord_flip() +
+      guides(fill = FALSE) +
+      scale_fill_viridis_d(direction = -1)
+
+# which characters are on screen the longest?
+char_scenes %>%
+      filter(group %in% c("Main", "Party", "Upside Down") ) %>%
+      ggplot(aes(x = reorder(character, screen_time), y = screen_time, fill = gender)) + 
+                   geom_bar(stat = "identity") +
+                   coord_flip()
+
+# are males or females on screen more?
+char_scenes %>%
+      filter(group %in% c("Main", "Party", "Upside Down") ) %>%
+      ggplot(aes(x = gender, y = screen_time, fill = gender)) + 
+      geom_bar(stat = "identity")
+
+# screen time by broup
+party <- scenes %>%
+      filter(group %in% c("Main", "Party", "Upside Down") ) %>%
+      group_by(group, character) %>%
+      summarize(screen_time = sum(scene_length)) %>%
+      ggplot(aes(x = reorder(character, screen_time), y = screen_time, fill = group)) + 
+            geom_bar(stat = "identity") +
+            scale_fill_manual(values = c("#1e193c", "#3a5fe5")) +
+            coord_flip()
+
+# which scenes are characters in?
+character_time <- scenes %>%
+      filter(group %in% c("Main", "Party", "Upside Down") ) %>%
+      group_by(character, seasonNum, episodeNum) %>%
+      summarize(screen_time = as.numeric(sum(scene_length)/60)) %>%
+      ungroup() %>%
+      complete(nesting(character), seasonNum, episodeNum) %>%
+      mutate(episode_id = seasonNum * 10 + episodeNum) %>%
+      filter(episode_id != 19)
+
+
+
+      ggplot(character_time, 
+             aes(x = character, y = as.factor(episode_id), fill = screen_time)) + 
+            geom_tile(color = "grey30", size = 0.1) +
+            coord_flip() +
+      scale_fill_continuous(low = "white", high = "red", na.value = "grey80") +
+      theme_minimal() +
+      theme(panel.grid.minor = element_line(color = "grey50"), 
+            panel.grid.major = element_blank(), 
+            panel.background = element_rect(fill = "grey80"))
+
+
+```
+```{r}
+# Which characters are seen together the most?
+majorchar_scenes <- scenes %>%
+      left_join(groups) %>%
+      filter(group == "Party") %>%
+      select(seasonNum, episodeNum, sceneNum, scene_length, character)
+
+
+mygrid <- majorchar_scenes %>%
+      full_join(majorchar_scenes, by = c("seasonNum", "episodeNum", "sceneNum") ) %>%
+      na.omit() %>%
+      unique() %>%
+      group_by(character.x, character.y) %>%
+      summarize(together_time = as.numeric(sum(scene_length.x))) 
+
+# works, but ugly
+ggplot(mygrid, aes(x = character.x, y = character.y, fill = together_time)) +
+      geom_tile() +
+      scale_fill_gradient(low = "white", high = "blue")
+
+```
+
+Jeff Lancaster also did a few neat visualizations:
+ * https://jeffreylancaster.github.io/stranger-things/duration/
+ * https://jeffreylancaster.github.io/stranger-things/duration-percent/
+
+
+```{r}
+
+```
+
+
+
