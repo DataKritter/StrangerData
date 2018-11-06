@@ -1,35 +1,48 @@
-
-
 library(shiny)
 library(ggplot2)
 
-# Define UI for application that draws a histogram
-shinyUI(fluidPage(
 
-    # Application title
-    titlePanel("Stranger Things"),
+navbarPage("Stranger Data!",
+           tabPanel("Seasons, Scenes, Episodes, and Screen Time",
+                    sidebarLayout(
+                          sidebarPanel(
+                                checkboxGroupInput("characters", "Y axis: Include which characters?",
+                                                   c("The Party" = "Party",
+                                                     "Other main characters" = "Main",
+                                                     "Minor characters" = "Minor",
+                                                     "Un-credited characters" = "Uncredited",
+                                                     "Upside-Down" = "Upside Down"), selected = "Party"),
+                                selectInput('metric', 'X axis: Count what?',
+                                            c("Seasons" = "seasonNum",
+                                              "Episodes" = "episode_id",
+                                              "Scenes" = "scene_id",
+                                              "Screen time" = "scene_length")),
+
+                                selectInput('color', 'Color: Subcount',
+                                            c("Seasons" = "seasonNum",
+                                              "Episodes" = "episode_id",
+                                              "Scenes" = "scene_id",
+                                              "Screen time" = "scene_length",
+                                              "Character group" = "group",
+                                              "Character" = "character"))
 
 
-    # Sidebar with a slider input for number of bins
-    sidebarLayout(
-        sidebarPanel(
-            checkboxGroupInput("characters", "Include characters:",
-                               c("The Party" = "Party",
-                                 "Other main characters" = "Main",
-                                 "Minor characters" = "Minor",
-                                 "Un-credited characters" = "Uncredited",
-                                 "Upside-Down" = "Upside Down"), selected = "Party"),
-            selectInput('metric', 'Which metric?',
-                        c("Seasons" = "seasonNum",
-                          "Episodes" = "episode_id",
-                          "Scenes" = "scene_id",
-                          "Screen time" = "scene_length"))
+                          ),
 
-        ),
+                          mainPanel(
+                                plotOutput("plot1")
+                          )
+                    )
+           ),
+           tabPanel("Summary",
+                    verbatimTextOutput("summary")
+           ),
+           navbarMenu("More",
+                      tabPanel("Table",
+                               DT::dataTableOutput("table")
+                      ),
+                      tabPanel("About"
 
-        # Show a plot of the generated distribution
-        mainPanel(
-            plotOutput("plot1")
-        )
-    )
-))
+                      )
+           )
+)

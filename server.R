@@ -55,9 +55,9 @@ server <- function(input,output){
     my_scenes <- reactive({
 
         test <- filter(scenes, group %in% input$characters) %>%
-        select(input$metric, character, group) %>%
+        select(input$metric, input$color, character, group) %>%
             distinct() %>%
-            group_by(character, group) %>%
+            group_by(group, character,input$color) %>%
             summarize(n = n())
         print(test)
         test
@@ -68,6 +68,13 @@ server <- function(input,output){
         test2 <- input$metric
         print(test2)
         test2
+    })
+
+    mycol <- reactive({
+
+        test3 <- input$color
+        print(test3)
+        test3
     })
 
 
