@@ -3,6 +3,13 @@ title: "R Notebook"
 output: html_notebook
 ---
 
+
+Questions for Gina:
+* What graphs could/should I make?
+* What is best approach?
+* How much is reasonable to expect kids of varying skills to do on their own in a short time?  Shiny app?  
+* Shiny apps + ggplot2
+
 First, we load lots of libraries that we'll need:
 
 ```{r}
