@@ -3,6 +3,7 @@ library(ggplot2)
 
 
 navbarPage("Stranger Data!",
+
            tabPanel("How many?",
                     sidebarLayout(
                           sidebarPanel(
@@ -26,9 +27,6 @@ navbarPage("Stranger Data!",
                     )
            ),
 
-
-
-
            tabPanel("Which ones?",
                     sidebarLayout(
                           sidebarPanel(
@@ -50,7 +48,27 @@ navbarPage("Stranger Data!",
                                 plotOutput("plot2", height = 800)
                           )
                     )
+           ),
+           tabPanel("Where?",
+                    sidebarLayout(
+                          sidebarPanel(
+                                checkboxGroupInput("characters3", "Y axis:",
+                                                   c("The Party" = "Party",
+                                                     "Other main characters" = "Main",
+                                                     "Upside-Down" = "Upside Down"), selected = "Party"),
+                                selectInput('metric3', 'X axis:',
+                                            c("Location (City)" = "location",
+                                              "Sublocation (Site)" = "subLocation")
+
+
+                          )),
+
+                          mainPanel(
+                                plotOutput("plot3", height = 800)
+                          )
+                    )
            )
+
 
 
 

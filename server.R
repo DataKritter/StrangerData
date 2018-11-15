@@ -115,7 +115,41 @@ server <- function(input,output){
     })
 
 
+    #Third Tab
+
+    scenes_locs <- reactive({
+
+        locs <- scenes %>%
+            filter(group %in% input$characters3) %>%
+            group_by(input$metric3, character, scene_seq) %>%
+            summarize(num = n()) %>%
+            top_n(5, wt = num) %>%
+            right_join(scenes)
+
+        print(locs)
+        locs
+    })
+
+    my_metric3 <- reactive({
+        my_metric3 <- input$metric3
+        print(my_metric3)
+        my_metric3
+    })
 
 
-    }
+    output$plot3 <- renderPlot({
+
+        ggplot(filter(scenes_locs(), num > 0),
+            aes(x = scene_seq, color = character, group = character)) +
+            geom_point(aes_string(y = input$metric3)) +
+            geom_line(aes_string(y = input$metric3)) +
+            guides(fill = FALSE) +
+            theme(legend.position = "bottom", legend.title = element_blank())
+
+    })
+
+
+
+
+}
 

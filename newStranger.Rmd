@@ -20,7 +20,7 @@ Then we start importing the various datasets from https://github.com/jeffreylanc
 
 #gender
 
-gender <- read_csv("gender.csv", col_types = cols(gender = col_factor(levels = c("female", 
+gender <- read_csv("gender.csv", col_types = cols(gender = col_factor(levels = c("female",
     "male"))), na = "NA")
 
 #groups
