@@ -3,7 +3,7 @@ library(ggplot2)
 
 
 navbarPage("Stranger Data!",
-           tabPanel("How many?",
+           tabPanel("Seasons, Scenes, & Episodes",
                     sidebarLayout(
                           sidebarPanel(
                                 checkboxGroupInput("characters", "Y axis: Include which characters?",
@@ -15,43 +15,28 @@ navbarPage("Stranger Data!",
                                 selectInput('metric', 'X axis: Count what?',
                                             c("Seasons" = "seasonNum",
                                               "Episodes" = "episode_id",
-                                              "Scenes" = "scene_seq"))
+                                              "Scenes" = "scene_id")),
+
+                                selectInput('color', 'Color: Subcount',
+                                            c("Seasons" = "seasonNum",
+                                              "Episodes" = "episode_id",
+                                              "Scenes" = "scene_id",
+                                              "Screen time" = "scene_length",
+                                              "Character group" = "group",
+                                              "Character" = "character"))
 
 
                           ),
 
                           mainPanel(
-                                plotOutput("plot1", height = 800)
+                                plotOutput("plot1")
                           )
                     )
            ),
-
-
-
-
-           tabPanel("Which ones?",
-                    sidebarLayout(
-                          sidebarPanel(
-                                checkboxGroupInput("characters2", "Y axis:",
-                                                   c("The Party" = "Party",
-                                                     "Other main characters" = "Main",
-                                                     "Minor characters" = "Minor",
-                                                     "Un-credited characters" = "Uncredited",
-                                                     "Upside-Down" = "Upside Down"), selected = "Party"),
-                                selectInput('metric2', 'X axis:',
-                                            c("Seasons" = "seasonNum",
-                                              "Episodes" = "episode_id",
-                                              "Scenes" = "scene_seq"))
-
-
-                          ),
-
-                          mainPanel(
-                                plotOutput("plot2", height = 800)
-                          )
-                    )
+           tabPanel("Tab 2",
+                    verbatimTextOutput("summary")
+           ),
+           tabPanel("Tab 3",
+                    verbatimTextOutput("Test")
            )
-
-
-
 )

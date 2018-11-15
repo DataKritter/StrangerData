@@ -38,24 +38,26 @@ scenes <- read_csv("stranger-things.csv",
                    sceneEnd = col_time(format = "%H:%M:%S"),
                    sceneStart = col_time(format = "%H:%M:%S")
                    )) %>%
+  arrange(seasonNum, episodeNum, sceneNum) %>%
+  mutate(scene_seq = row_number()) %>%
       gather(chars1:chars18, key = Chars, value = Name) %>%
       arrange(seasonNum, episodeNum, sceneNum) %>%
       select(-Chars) %>%
       na.omit() %>%
       rename(character = Name) %>%
       mutate(scene_length = sceneStart - sceneEnd,
-             episode_id = seasonNum * 10 + episodeNum,
+             episode_id = seasonNum + episodeNum/10,
              scene_id = seasonNum * 10 + episodeNum + sceneNum/1000) %>%
       left_join(gender) %>%
       left_join(groups)
 
 #characters in scenes
 char_scenes <- scenes  %>%
-      select(character, seasonNum, episode_id, scene_id, scene_length) %>%
+      select(character, seasonNum, episode_id, scene_seq, scene_id, scene_length, scene_seq) %>%
       distinct() %>%
       arrange(character, scene_id) %>%
       group_by(character) %>%
-      summarize(num_scenes = n_distinct(scene_id),
+      summarize(num_scenes = n_distinct(scene_seq),
                 num_episodes = n_distinct(episode_id),
                 num_seasons = n_distinct(seasonNum),
                 screen_time = sum(scene_length)) %>%
@@ -64,7 +66,7 @@ char_scenes <- scenes  %>%
       mutate(group = ifelse(is.na(group), "Uncredited", group))
 
 ```
-
+This is a document
 
 ```{r}
 # which characters are in the most episodes?
@@ -160,7 +162,17 @@ Jeff Lancaster also did a few neat visualizations:
 
 
 ```{r}
-
+filter(scenes, group == "Party" | group == "Main") %>%
+ggplot(aes(x = as.factor(scene_seq), y = character, fill = group)) +
+  geom_tile() +
+  facet_grid(group~episode_id,  scales = "free", switch = "x" ) +
+  theme(panel.spacing = unit(0, "lines"), 
+         strip.background = element_blank(),
+         strip.placement = "outside") +
+  xlab("Episode ID") +
+  theme(axis.title.y=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
 ```
 
 
