@@ -3,7 +3,6 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-First, we load lots of libraries that we'll need:
 
 ```{r}
 library(tidyverse)
