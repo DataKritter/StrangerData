@@ -1,0 +1,13 @@
+name: StrangerData
+title: StrangerData
+username:
+account: zoonut
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 575214
+bundleId: 1703696
+url: https://zoonut.shinyapps.io/StrangerData/
+when: 1542337240.31713
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .Rapp.history|Archive.zip|basic_shiny_ggplot_template.R|newStranger.nb.html|newStranger.Rmd|stranger.nb.html|stranger.Rmd|StrangerQuestions.docx|ui1.R|ui2 - not working.R
